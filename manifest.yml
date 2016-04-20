@@ -1,0 +1,5 @@
+applications:
+- name: openwhisk-apiapp
+  host: openwhisk-apiapp
+  buildpack: https://github.com/cloudfoundry/staticfile-buildpack.git
+  memory: 64M
