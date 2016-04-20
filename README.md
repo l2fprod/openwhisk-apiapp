@@ -89,6 +89,30 @@ we inject the OpenWhisk authentication before implementing our actual greeting A
 This simply passes the call to OpenWhisk, waiting for the action to complete ```blocking=true```.
 The lines would need to be repeated for every API you want to expose.
 
+#### Use GET instead of POST
+
+In the previous example, you need to use POST to call the API but
+most API calls may be better suited for a GET.
+
+No worries, nginx can handle that:
+
+  ```
+  location /api/v1/get/greeting {
+    if ($request_method = 'OPTIONS') { return 204; }
+    if ($request_method != 'GET') { return 403; }
+    # OpenWhisk expect a POST so change the method on the fly
+    proxy_method POST;
+
+    # Construct the POST body with the "name" retrieved from the query parameters
+    set $body '{"name":"$arg_name"}';
+    proxy_set_body $body;
+    # Don't forward the query parameters
+    set $args "";
+    # Call OpenWhisk greeting action
+    proxy_pass https://openwhisk.ng.bluemix.net/api/v1/namespaces/whisk.system/actions/samples/greeting?blocking=true;
+  }
+  ```
+
 ### Calling the API
 
 [**home.js**](home.js) shows how to call the API from JavaScript.
